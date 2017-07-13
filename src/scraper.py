@@ -13,21 +13,18 @@ def main(argv):
     param = '7.6.2017_7.7.2017'
     end_url = param + '#History'
     url = urljoin(base_url,end_url)
-    print(url)
-    #scrape('http://en.boerse-frankfurt.de/index/pricehistory/DAX/7.6.2017_7.7.2017#History')
+    scrape('http://en.boerse-frankfurt.de/index/pricehistory/DAX/7.6.2017_7.7.2017#History')
 
 def scrape(url):
     driver = webdriver.PhantomJS()
     db = get_database()
-    historical_data = get_historical_data(url, driver, db)
+    historical_data = extract_historical_data(url, driver, db)
     driver.quit()
 
 
-def get_historical_data(url, driver, database):
+def extract_historical_data(url, driver, database):
     driver.get(url)
-    rows = []
     soup = BeautifulSoup(driver.page_source, 'lxml')
-    document = {}
 
     table = soup.find(id=re.compile(r'grid-table-.*'))
     table_body = table.find('tbody')
@@ -60,7 +57,7 @@ def get_database():
 
 def insert_document(db, document):
     try:
-        result = db.historical.insert_one(document)
+        result = db.dax_historical.insert_one(document)
         print(result)
     except errors.DuplicateKeyError as e:
         print(e.details)
